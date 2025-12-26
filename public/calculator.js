@@ -1,134 +1,133 @@
-// calculator.js
-// Smart Scientific Calculator Engine v1.0
-// Offline • Safe • Extendable
-
-class MathContext {
-  constructor() {
-    this.angleMode = "DEG"; // DEG | RAD
-  }
-
-  toRadians(value) {
-    return this.angleMode === "DEG"
-      ? value * Math.PI / 180
-      : value;
-  }
-}
+/* =========================================================
+   Smart Calculator Core Engine
+   Version: 1.0.0
+   Author: Smart Calculator Project
+   Responsibility: Pure calculation logic (NO UI)
+========================================================= */
 
 class CalculatorEngine {
   constructor() {
-    this.ctx = new MathContext();
     this.reset();
   }
 
+  /* =======================
+     Core State
+  ======================== */
   reset() {
-    this.expression = "";
+    this.expression = '';
+    this.lastResult = null;
+    this.error = null;
   }
 
+  /* =======================
+     Input Handling
+  ======================== */
   input(value) {
-    this.expression += value;
+    if (this.error) this.reset();
+
+    // Normalize operators
+    const normalized = this._normalizeInput(value);
+
+    // Prevent invalid sequences
+    if (!this._isValidNext(normalized)) return;
+
+    this.expression += normalized;
   }
 
   getDisplayValue() {
-    return this.expression || "0";
+    return this.expression || '0';
   }
 
-  toggleAngleMode() {
-    this.ctx.angleMode = this.ctx.angleMode === "DEG" ? "RAD" : "DEG";
-    return this.ctx.angleMode;
-  }
-
+  /* =======================
+     Calculation
+  ======================== */
   calculate() {
-    const tokens = this.tokenize(this.expression);
-    const ast = this.parse(tokens);
-    const result = this.evaluate(ast);
-    this.expression = String(result);
-    return result;
+    if (!this.expression) return 0;
+
+    try {
+      const safeExpression = this._sanitizeExpression(this.expression);
+      const result = this._safeEval(safeExpression);
+
+      this.lastResult = result;
+      this.expression = String(result);
+      this.error = null;
+
+      return result;
+    } catch (e) {
+      this.error = 'CALC_ERROR';
+      throw new Error('Calculation Error');
+    }
   }
 
-  /* ---------------- Tokenizer ---------------- */
-
-  tokenize(expr) {
-    const regex = /\s*([0-9]*\.?[0-9]+|sin|cos|tan|√|\^|\+|\-|\*|\/|\(|\))/g;
-    return expr.match(regex) || [];
+  /* =======================
+     Utilities
+  ======================== */
+  _normalizeInput(val) {
+    const map = {
+      '×': '*',
+      '÷': '/',
+      '−': '-'
+    };
+    return map[val] || val;
   }
 
-  /* ---------------- Parser (Shunting Yard) ---------------- */
+  _isValidNext(val) {
+    const last = this.expression.slice(-1);
 
-  parse(tokens) {
-    const output = [];
-    const ops = [];
-    const prec = { "+":1, "-":1, "*":2, "/":2, "^":3 };
-
-    const isFunc = t => ["sin","cos","tan","√"].includes(t);
-
-    for (let t of tokens) {
-      if (!isNaN(t)) {
-        output.push({ type:"num", value: parseFloat(t) });
-      } else if (isFunc(t)) {
-        ops.push(t);
-      } else if ("+-*/^".includes(t)) {
-        while (
-          ops.length &&
-          prec[ops[ops.length-1]] >= prec[t]
-        ) {
-          output.push({ type:"op", value: ops.pop() });
-        }
-        ops.push(t);
-      } else if (t === "(") {
-        ops.push(t);
-      } else if (t === ")") {
-        while (ops.length && ops[ops.length-1] !== "(") {
-          output.push({ type:"op", value: ops.pop() });
-        }
-        ops.pop();
-        if (isFunc(ops[ops.length-1])) {
-          output.push({ type:"func", value: ops.pop() });
-        }
-      }
+    // Prevent double operators
+    if (this._isOperator(last) && this._isOperator(val)) {
+      return false;
     }
 
-    while (ops.length) {
-      output.push({ type:"op", value: ops.pop() });
+    // Prevent starting with invalid operator
+    if (!this.expression && this._isOperator(val) && val !== '-') {
+      return false;
     }
 
-    return output;
+    // Prevent multiple dots in number
+    if (val === '.') {
+      const parts = this.expression.split(/[\+\-\*\/]/);
+      if (parts[parts.length - 1].includes('.')) return false;
+    }
+
+    return true;
   }
 
-  /* ---------------- Evaluator ---------------- */
+  _isOperator(char) {
+    return ['+', '-', '*', '/'].includes(char);
+  }
 
-  evaluate(rpn) {
-    const stack = [];
+  _sanitizeExpression(expr) {
+    // Remove trailing operator
+    if (this._isOperator(expr.slice(-1))) {
+      expr = expr.slice(0, -1);
+    }
+    return expr;
+  }
 
-    for (let t of rpn) {
-      if (t.type === "num") {
-        stack.push(t.value);
-      } else if (t.type === "op") {
-        const b = stack.pop();
-        const a = stack.pop();
-        switch (t.value) {
-          case "+": stack.push(a+b); break;
-          case "-": stack.push(a-b); break;
-          case "*": stack.push(a*b); break;
-          case "/": stack.push(a/b); break;
-          case "^": stack.push(Math.pow(a,b)); break;
-        }
-      } else if (t.type === "func") {
-        const v = stack.pop();
-        switch (t.value) {
-          case "sin": stack.push(Math.sin(this.ctx.toRadians(v))); break;
-          case "cos": stack.push(Math.cos(this.ctx.toRadians(v))); break;
-          case "tan": stack.push(Math.tan(this.ctx.toRadians(v))); break;
-          case "√": stack.push(Math.sqrt(v)); break;
-        }
-      }
+  _safeEval(expr) {
+    // Strict math-only evaluation
+    if (!/^[0-9+\-*/().\s]+$/.test(expr)) {
+      throw new Error('Unsafe expression');
     }
 
-    if (stack.length !== 1 || isNaN(stack[0])) {
-      throw new Error("Math Error");
-    }
+    // eslint-disable-next-line no-new-func
+    return Function(`"use strict"; return (${expr})`)();
+  }
 
-    return +stack[0].toFixed(10);
+  /* =======================
+     Advanced (Future Ready)
+  ======================== */
+  getLastResult() {
+    return this.lastResult;
+  }
+
+  hasError() {
+    return this.error !== null;
   }
 }
 
+/* =======================
+   Export (Browser Global)
+======================== */
 window.CalculatorEngine = CalculatorEngine;
