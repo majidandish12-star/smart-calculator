@@ -122,43 +122,36 @@
       <button>0</button>
     </div>
   </div>
+<script src="calculator.js"></script>
+<script>
+  const display = document.getElementById('display');
+  const engine = new CalculatorEngine();
 
-  <script>
-    const display = document.getElementById('display');
-    let current = '';
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.textContent;
 
-    document.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const val = btn.textContent;
+      if (val === 'C') {
+        engine.reset();
+        display.textContent = '0';
+        return;
+      }
 
-        if (val === 'C') {
-          current = '';
-          display.textContent = '0';
-          return;
+      if (val === '=') {
+        try {
+          const result = engine.calculate();
+          display.textContent = result;
+        } catch {
+          display.textContent = 'خطا';
         }
+        return;
+      }
 
-        if (val === '=') {
-          try {
-            const result = eval(
-              current
-                .replace(/×/g, '*')
-                .replace(/÷/g, '/')
-                .replace(/−/g, '-')
-            );
-            display.textContent = result;
-            current = String(result);
-          } catch {
-            display.textContent = 'خطا';
-            current = '';
-          }
-          return;
-        }
-
-        current += val;
-        display.textContent = current;
-      });
+      engine.input(val);
+      display.textContent = engine.getDisplayValue();
     });
-  </script>
+  });
+</script>
 
   <!-- Service Worker -->
   <script>
