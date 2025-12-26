@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧮 ماشین حساب هوشمند</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: #020617;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.5);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    header p {
+      font-size: .9rem;
+      opacity: .7;
+      margin-top: 4px;
+    }
+
+    .display {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1.6rem;
+      text-align: left;
+      overflow-x: auto;
+      margin-bottom: 15px;
+      min-height: 48px;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 16px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      background: #1e293b;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(.96);
+    }
+
+    .op {
+      background: #334155;
+    }
+
+    .equal {
+      grid-column: span 2;
+      background: #2563eb;
+    }
+
+    .clear {
+      background: #7f1d1d;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <header>
+      <h1>🧮 ماشین حساب هوشمند</h1>
+      <p>نسخه پایه – آفلاین</p>
+    </header>
+
+    <div id="display" class="display">0</div>
+
+    <div class="keys">
+      <button class="clear">C</button>
+      <button class="op">÷</button>
+      <button class="op">×</button>
+      <button class="op">−</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="op">+</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>.</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button class="equal">=</button>
+
+      <button>0</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    let current = '';
+
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.textContent;
+
+        if (val === 'C') {
+          current = '';
+          display.textContent = '0';
+          return;
+        }
+
+        if (val === '=') {
+          try {
+            const result = eval(
+              current
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/−/g, '-')
+            );
+            display.textContent = result;
+            current = String(result);
+          } catch {
+            display.textContent = 'خطا';
+            current = '';
+          }
+          return;
+        }
+
+        current += val;
+        display.textContent = current;
+      });
+    });
+  </script>
+
+</body>
+</html>
