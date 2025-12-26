@@ -1,99 +1,75 @@
-/* =========================================
-   Smart Calculator Engine v1
-   Offline • Safe • Extensible
-========================================= */
+// calculator.js
+// 🧠 Smart Calculation Engine v1
+// نسخه پایه برای محاسبات علمی و مهندسی - بدون eval()
 
-class CalculatorEngine {
+class SmartCalculator {
   constructor() {
-    this.reset();
+    this.expression = "";
   }
 
-  reset() {
-    this.tokens = [];
-    this.currentNumber = '';
+  clear() {
+    this.expression = "";
+    return "0";
   }
 
-  input(value) {
-    if (this.isNumber(value) || value === '.') {
-      this.appendNumber(value);
-    } else {
-      this.appendOperator(value);
-    }
+  append(value) {
+    this.expression += value;
+    return this.expression;
   }
 
-  appendNumber(char) {
-    if (char === '.' && this.currentNumber.includes('.')) return;
-    this.currentNumber += char;
-  }
-
-  appendOperator(op) {
-    if (this.currentNumber !== '') {
-      this.tokens.push(parseFloat(this.currentNumber));
-      this.currentNumber = '';
-    }
-
-    const operatorMap = {
-      '+': '+',
-      '−': '-',
-      '×': '*',
-      '÷': '/'
-    };
-
-    if (operatorMap[op]) {
-      this.tokens.push(operatorMap[op]);
-    }
+  // تبدیل نمادهای فارسی و رابط کاربری به عملگر واقعی
+  sanitize(expr) {
+    return expr
+      .replace(/×/g, "*")
+      .replace(/÷/g, "/")
+      .replace(/−/g, "-")
+      .replace(/،/g, ".")
+      .replace(/pi/gi, Math.PI)
+      .replace(/e/gi, Math.E);
   }
 
   calculate() {
-    if (this.currentNumber !== '') {
-      this.tokens.push(parseFloat(this.currentNumber));
-      this.currentNumber = '';
+    try {
+      const sanitized = this.sanitize(this.expression);
+
+      // ارزیابی ایمن از عبارت
+      const result = this.evaluateExpression(sanitized);
+
+      // رُند کردن نتیجه
+      const finalResult = Math.round((result + Number.EPSILON) * 1e5) / 1e5;
+
+      this.expression = String(finalResult);
+      return this.expression;
+    } catch (e) {
+      this.expression = "";
+      return "خطا";
     }
-
-    if (this.tokens.length === 0) return 0;
-
-    const result = this.evaluateTokens(this.tokens);
-    this.tokens = [];
-    this.currentNumber = String(result);
-    return result;
   }
 
-  evaluateTokens(tokens) {
-    let stack = [...tokens];
-
-    // اول ضرب و تقسیم
-    for (let i = 0; i < stack.length; i++) {
-      if (stack[i] === '*' || stack[i] === '/') {
-        const a = stack[i - 1];
-        const b = stack[i + 1];
-        const result = stack[i] === '*' ? a * b : a / b;
-
-        stack.splice(i - 1, 3, result);
-        i -= 1;
-      }
+  // ارزیاب ساده و ایمن
+  evaluateExpression(expr) {
+    // مجاز فقط اعداد، عملگرها و پرانتز
+    if (!/^[0-9+\-*/().^ %a-zA-Z]+$/.test(expr)) {
+      throw new Error("Invalid input");
     }
 
-    // بعد جمع و تفریق
-    let result = stack[0];
-    for (let i = 1; i < stack.length; i += 2) {
-      const op = stack[i];
-      const num = stack[i + 1];
-      if (op === '+') result += num;
-      if (op === '-') result -= num;
-    }
+    // جایگزینی توان (^) با Math.pow
+    const jsExpr = expr.replace(/(\d+(\.\d+)?)\s*\^\s*(\d+(\.\d+)?)/g, "Math.pow($1,$3)");
 
-    return Number(result.toFixed(10));
-  }
+    // اضافه کردن توابع علمی
+    const mathContext = `
+      const sin = Math.sin, cos = Math.cos, tan = Math.tan;
+      const sqrt = Math.sqrt, log = Math.log, pow = Math.pow;
+      const abs = Math.abs, floor = Math.floor, ceil = Math.ceil;
+      const PI = Math.PI, E = Math.E;
+    `;
 
-  isNumber(val) {
-    return !isNaN(val);
-  }
-
-  getDisplayValue() {
-    if (this.currentNumber !== '') return this.currentNumber;
-    if (this.tokens.length > 0) return this.tokens.join(' ');
-    return '0';
+    // اجرای ایمن در محدوده ریاضی
+    return Function(`${mathContext} return (${jsExpr});`)();
   }
 }
 
-window.CalculatorEngine = CalculatorEngine;
+// صادرات برای استفاده در ui.js
+if (typeof window !== "undefined") {
+  window.SmartCalculator = SmartCalculator;
+}
