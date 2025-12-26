@@ -1,0 +1,6 @@
+# نصب wasm-pack اگر ندارید
+cargo install wasm-pack
+
+# ساخت WASM
+cd public/wasm
+wasm-pack build --target web --out-dir ../pkg
