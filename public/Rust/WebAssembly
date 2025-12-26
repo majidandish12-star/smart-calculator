@@ -1,0 +1,17 @@
+use wasm_bindgen::prelude::*;
+#[wasm_bindgen]
+pub fn calcPhysics(params: &JsValue) -> JsValue {
+    let weight: f64 = js_sys::Reflect::get(params, &JsValue::from_str("weight")).unwrap().as_f64().unwrap();
+    let volume: f64 = js_sys::Reflect::get(params, &JsValue::from_str("volume")).unwrap().as_f64().unwrap();
+    let velocity: f64 = js_sys::Reflect::get(params, &JsValue::from_str("velocity")).unwrap().as_f64().unwrap();
+
+    let kinetic_energy = 0.5 * weight * velocity.powf(2.0);
+    let density = weight / volume;
+    let momentum = weight * velocity;
+
+    JsValue::from_serde(&serde_json::json!({
+        "kinetic_energy": kinetic_energy,
+        "density": density,
+        "momentum": momentum
+    })).unwrap()
+}
