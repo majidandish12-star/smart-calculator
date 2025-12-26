@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>🧮 ماشین حساب هوشمند</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
 
   <style>
     body {
@@ -74,20 +79,15 @@
       transform: scale(.96);
     }
 
-    .op {
-      background: #334155;
-    }
-
+    .op { background: #334155; }
     .equal {
       grid-column: span 2;
       background: #2563eb;
     }
-
-    .clear {
-      background: #7f1d1d;
-    }
+    .clear { background: #7f1d1d; }
   </style>
 </head>
+
 <body>
 
   <div class="app">
@@ -158,6 +158,15 @@
         display.textContent = current;
       });
     });
+  </script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js");
+      });
+    }
   </script>
 
 </body>
