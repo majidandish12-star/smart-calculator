@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>🧮 ماشین حساب هوشمند</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
 
@@ -44,7 +42,6 @@
     header p {
       font-size: .9rem;
       opacity: .7;
-      margin-top: 4px;
     }
 
     .display {
@@ -75,74 +72,69 @@
       cursor: pointer;
     }
 
-    button:active {
-      transform: scale(.96);
-    }
+    button:active { transform: scale(.96); }
 
     .op { background: #334155; }
-    .equal {
-      grid-column: span 2;
-      background: #2563eb;
-    }
+    .equal { grid-column: span 2; background: #2563eb; }
     .clear { background: #7f1d1d; }
   </style>
 </head>
 
 <body>
 
-  <div class="app">
-    <header>
-      <h1>🧮 ماشین حساب هوشمند</h1>
-      <p>نسخه پایه – آفلاین</p>
-    </header>
+<div class="app">
+  <header>
+    <h1>🧮 ماشین حساب هوشمند</h1>
+    <p>نسخه پایه – آفلاین</p>
+  </header>
 
-    <div id="display" class="display">0</div>
+  <div id="display" class="display">0</div>
 
-    <div class="keys">
-      <button class="clear">C</button>
-      <button class="op">÷</button>
-      <button class="op">×</button>
-      <button class="op">−</button>
+  <div class="keys">
+    <button class="clear">C</button>
+    <button class="op">÷</button>
+    <button class="op">×</button>
+    <button class="op">−</button>
 
-      <button>7</button>
-      <button>8</button>
-      <button>9</button>
-      <button class="op">+</button>
+    <button>7</button>
+    <button>8</button>
+    <button>9</button>
+    <button class="op">+</button>
 
-      <button>4</button>
-      <button>5</button>
-      <button>6</button>
-      <button>.</button>
+    <button>4</button>
+    <button>5</button>
+    <button>6</button>
+    <button>.</button>
 
-      <button>1</button>
-      <button>2</button>
-      <button>3</button>
-      <button class="equal">=</button>
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button class="equal">=</button>
 
-      <button>0</button>
-    </div>
+    <button>0</button>
   </div>
+</div>
+
 <script src="calculator.js"></script>
 <script>
-  const display = document.getElementById('display');
+  const display = document.getElementById("display");
   const engine = new CalculatorEngine();
 
-  document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
+  document.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
       const val = btn.textContent;
 
-      if (val === 'C') {
+      if (val === "C") {
         engine.reset();
-        display.textContent = '0';
+        display.textContent = "0";
         return;
       }
 
-      if (val === '=') {
+      if (val === "=") {
         try {
-          const result = engine.calculate();
-          display.textContent = result;
+          display.textContent = engine.calculate();
         } catch {
-          display.textContent = 'خطا';
+          display.textContent = "خطا";
         }
         return;
       }
@@ -153,14 +145,13 @@
   });
 </script>
 
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js");
-      });
-    }
-  </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js");
+    });
+  }
+</script>
 
 </body>
 </html>
