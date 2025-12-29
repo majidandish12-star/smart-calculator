@@ -1,0 +1,21 @@
+import { parseSentence } from '../ai/nlp-parser.js';
+
+class EngineV2 extends EngineV1 {
+  evaluate(input) {
+    if (/[آ-ی]/.test(input)) {
+      const intent = parseSentence(input);
+      if (intent.type==='area') {
+        const res = intent.width * intent.height;
+        return {
+          input,
+          result: res,
+          explain: `Area = ${intent.width} × ${intent.height}`,
+          confidence: 0.9
+        };
+      }
+    }
+    return super.evaluate(input);
+  }
+}
+
+window.EngineV2 = EngineV2;
