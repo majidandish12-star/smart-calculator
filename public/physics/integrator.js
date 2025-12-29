@@ -1,12 +1,9 @@
 export function integrate(body, dt) {
-  const ax = body.forceX / body.mass;
-  const ay = body.forceY / body.mass;
+  body.velocity.x += (body.force.x / body.mass) * dt;
+  body.velocity.y += (body.force.y / body.mass) * dt;
 
-  body.vx += ax * dt;
-  body.vy += ay * dt;
+  body.position.x += body.velocity.x * dt;
+  body.position.y += body.velocity.y * dt;
 
-  body.x += body.vx * dt;
-  body.y += body.vy * dt;
-
-  body.resetForces();
+  body.resetForce();
 }
