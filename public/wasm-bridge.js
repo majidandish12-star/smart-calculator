@@ -1,19 +1,36 @@
-import init, { calculate_physics } from "./pkg/hypercalc_wasm.js";
+/* =========================================================
+   WASM Bridge Layer
+   Responsibility: Load & communicate with Rust WASM
+========================================================= */
 
-let wasmReady = false;
+let wasmInstance = null;
 
+/**
+ * Initialize WASM module
+ */
 export async function initWasm() {
-  if (!wasmReady) {
-    await init();
-    wasmReady = true;
-    console.log("✅ WASM initialized");
-  }
+  if (wasmInstance) return wasmInstance;
+
+  const wasmUrl = "./pkg/hypercalc_wasm.js";
+
+  const wasmModule = await import(wasmUrl);
+  await wasmModule.default();
+
+  wasmInstance = wasmModule;
+  return wasmInstance;
 }
 
+/**
+ * Physics calculation via WASM
+ */
 export function physicsFromWasm({ mass, velocity, volume }) {
-  if (!wasmReady) {
+  if (!wasmInstance) {
     throw new Error("WASM not initialized");
   }
 
-  return calculate_physics(mass, velocity, volume);
+  return wasmInstance.calculate_physics(
+    Number(mass),
+    Number(velocity),
+    Number(volume)
+  );
 }
