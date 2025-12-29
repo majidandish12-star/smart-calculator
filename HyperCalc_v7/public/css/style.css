@@ -1,0 +1,5 @@
+body { background:#0f172a;color:#e5e7eb;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;}
+.app { background:#020617;padding:20px;border-radius:16px;width:420px;}
+#display { border:1px solid #334155;padding:10px;margin-bottom:10px;}
+canvas { border:1px solid #334155;margin-bottom:10px;}
+button { margin:4px;padding:8px 12px;}
