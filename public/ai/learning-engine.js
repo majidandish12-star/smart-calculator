@@ -1,16 +1,15 @@
-hereclass LearningEngine {
+export class LearningEngine {
   constructor() {
-    this.patterns = {};
+    this.memory = JSON.parse(localStorage.getItem('hc-memory') || '[]');
   }
 
-  learn(expr) {
-    this.patterns[expr] = (this.patterns[expr] || 0) + 1;
+  remember(entry) {
+    this.memory.push(entry);
+    localStorage.setItem('hc-memory', JSON.stringify(this.memory));
   }
 
-  predict() {
-    return Object.entries(this.patterns)
-      .sort((a,b)=>b[1]-a[1])[0]?.[0];
+  suggest() {
+    const last = this.memory.slice(-1)[0];
+    return last ? `شاید دوباره ${last.input}?` : null;
   }
 }
-
-window.LearningEngine = LearningEngine;
