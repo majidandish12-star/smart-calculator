@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧮 ماشین حساب هوشمند + Reality</title>
+  <title>🧮 HyperCalc – Smart & Reality Calculator</title>
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
@@ -19,30 +19,17 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .app {
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       background: #020617;
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 20px 50px rgba(0,0,0,.5);
     }
-
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    header h1 {
-      font-size: 1.4rem;
-      margin: 0;
-    }
-
-    header p {
-      font-size: .9rem;
-      opacity: .7;
-    }
+    header { text-align: center; margin-bottom: 15px; }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header p { opacity: .7; font-size: .85rem; }
 
     .display {
       background: #020617;
@@ -51,7 +38,6 @@
       padding: 15px;
       font-size: 1.6rem;
       text-align: left;
-      overflow-x: auto;
       margin-bottom: 15px;
       min-height: 48px;
     }
@@ -63,21 +49,25 @@
     }
 
     button {
-      padding: 16px;
-      font-size: 1.1rem;
+      padding: 14px;
+      font-size: 1rem;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #1e293b;
       color: #e5e7eb;
       cursor: pointer;
     }
-
     button:active { transform: scale(.96); }
-
     .op { background: #334155; }
     .equal { grid-column: span 2; background: #2563eb; }
     .clear { background: #7f1d1d; }
-    .extra { background: #047857; } /* برای دکمه‌های Reality/Export */
+    .extra { background: #047857; }
+
+    canvas {
+      margin-top: 15px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+    }
   </style>
 </head>
 
@@ -85,8 +75,8 @@
 
 <div class="app">
   <header>
-    <h1>🧮 ماشین حساب هوشمند</h1>
-    <p>نسخه حرفه‌ای – نیمه‌آفلاین / آنلاین</p>
+    <h1>🧮 HyperCalc</h1>
+    <p>Version 4 – Reality & Physics Engine</p>
   </header>
 
   <div id="display" class="display">0</div>
@@ -97,208 +87,31 @@
     <button class="op">×</button>
     <button class="op">−</button>
 
-    <button>7</button>
-    <button>8</button>
-    <button>9</button>
+    <button>7</button><button>8</button><button>9</button>
     <button class="op">+</button>
 
-    <button>4</button>
-    <button>5</button>
-    <button>6</button>
-    <button class="op">.</button>
+    <button>4</button><button>5</button><button>6</button>
+    <button>.</button>
 
-    <button>1</button>
-    <button>2</button>
-    <button>3</button>
+    <button>1</button><button>2</button><button>3</button>
     <button class="equal">=</button>
 
     <button>0</button>
-    <button class="extra" id="uploadBtn">📷 تحلیل تصویر</button>
-    <button class="extra" id="exportCSVBtn">CSV</button>
-    <button class="extra" id="exportPDFBtn">PDF</button>
+    <button class="extra" id="imgBtn">📷 Reality</button>
+    <button class="extra" id="csvBtn">CSV</button>
+    <button class="extra" id="pdfBtn">PDF</button>
   </div>
 
-  <input type="file" id="upload" accept="image/*" style="display:none" />
-
-  <canvas id="canvas" width="400" height="300" style="border:1px solid #1e293b;margin-top:15px;"></canvas>
-  <div id="chartContainer" style="width:100%; height:250px;margin-top:15px;"></div>
+  <input type="file" id="fileInput" accept="image/*" hidden />
+  <canvas id="canvas" width="420" height="260"></canvas>
 </div>
 
-<script type="module">
-
-import { SmartEngine } from './smart-engine.js';
-import Chart from 'https://cdn.jsdelivr.net/npm/chart.js';
-import { jsPDF } from 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-
-const display = document.getElementById("display");
-const engine = new SmartEngine('engineer');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const uploadInput = document.getElementById('upload');
-const chartContainer = document.getElementById('chartContainer');
-let chart = null;
-
-// =======================
-// دکمه‌های عددی و ریاضی
-// =======================
-document.querySelectorAll(".keys button").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const val = btn.textContent;
-
-    if (val === "C") {
-      engine.clearHistory();
-      engine.clearRealityHistory();
-      display.textContent = "0";
-      if (chart) chart.destroy();
-      return;
-    }
-
-    if (val === "=") {
-      try {
-        const res = engine.evaluate(display.textContent);
-        display.textContent = res.result;
-      } catch {
-        display.textContent = "خطا";
-      }
-      return;
-    }
-
-    // Reality / Export buttons
-    if (val === "📷 تحلیل تصویر") {
-      uploadInput.click();
-      return;
-    }
-    if (val === "CSV") { exportCSV(); return; }
-    if (val === "PDF") { exportPDF(); return; }
-
-    engine.input ? engine.input(val) : display.textContent += val;
-    display.textContent = engine.getDisplayValue ? engine.getDisplayValue() : display.textContent;
-  });
-});
-
-// =======================
-// تحلیل تصویر / واقعیت
-// =======================
-uploadInput.addEventListener("change", async () => {
-  const file = uploadInput.files[0];
-  if (!file) return alert('یک تصویر انتخاب کنید!');
-
-  const data = await engine.analyzeReality(file);
-  engine.displayResult('display', data);
-  updateChart();
-});
-
-// =======================
-// نمودار
-// =======================
-function updateChart() {
-  const history = engine.getRealityHistory();
-  if (!history.length) return;
-  const labels = history.map((_, i) => `شیء ${i+1}`);
-  const weights = history.map(h => h.weight);
-  const volumes = history.map(h => h.volume);
-  const energies = history.map(h => h.physics.kinetic_energy);
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(chartContainer.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'وزن (kg)', data: weights, backgroundColor: 'rgba(54, 162, 235, 0.6)' },
-        { label: 'حجم (m³)', data: volumes, backgroundColor: 'rgba(255, 206, 86, 0.6)' },
-        { label: 'انرژی جنبشی (J)', data: energies, backgroundColor: 'rgba(75, 192, 192, 0.6)' }
-      ]
-    },
-    options: { responsive:true, plugins:{legend:{position:'top'}} }
-  });
-}
-
-// =======================
-// خروجی CSV
-// =======================
-function exportCSV() {
-  const history = engine.getRealityHistory();
-  let csv = 'Object,Weight(kg),Volume(m3),KineticEnergy(J),Density,Momentum\n';
-  history.forEach((h,i)=>csv+=`Object ${i+1},${h.weight},${h.volume},${h.physics.kinetic_energy},${h.physics.density},${h.physics.momentum}\n`);
-  const blob = new Blob([csv],{type:'text/csv'});
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'hypercalc_data.csv';
-  link.click();
-}
-
-// =======================
-// خروجی PDF
-// =======================
-function exportPDF() {
-  const doc = new jsPDF();
-  const history = engine.getRealityHistory();
-  doc.setFontSize(12);
-  doc.text('HyperCalc Reality Analysis',10,10);
-  let y=20;
-  history.forEach((h,i)=>{
-    doc.text(`شیء ${i+1}: وزن=${h.weight.toFixed(2)}kg, حجم=${h.volume.toFixed(2)}m³, انرژی=${h.physics.kinetic_energy.toFixed(2)}J`,10,y);
-    y+=10;
-  });
-  doc.save('hypercalc_report.pdf');
-}
-
-// =======================
-// Service Worker برای آفلاین
-// =======================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
-}
-
-</script>
-
-</body>
-</html>
-    <button>1</button>
-    <button>2</button>
-    <button>3</button>
-    <button class="equal">=</button>
-
-    <button>0</button>
-  </div>
-</div>
-
-<script src="calculator.js"></script>
-<script>
-  const display = document.getElementById("display");
-  const engine = new CalculatorEngine();
-
-  document.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const val = btn.textContent;
-
-      if (val === "C") {
-        engine.reset();
-        display.textContent = "0";
-        return;
-      }
-
-      if (val === "=") {
-        try {
-          display.textContent = engine.calculate();
-        } catch {
-          display.textContent = "خطا";
-        }
-        return;
-      }
-
-      engine.input(val);
-      display.textContent = engine.getDisplayValue();
-    });
-  });
-</script>
+<script type="module" src="./ui.js"></script>
 
 <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js");
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
     });
   }
 </script>
