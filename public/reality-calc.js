@@ -1,45 +1,45 @@
-import initRust, { calcPhysics } from './reality-calc-rust_wasm.js';
+/* =========================================================
+   Reality Calculation Engine
+   Uses: WASM if available, JS fallback otherwise
+========================================================= */
 
-const aiWorker = new Worker('reality-calc-ai.js');
+import { initWasm, physicsFromWasm } from "./wasm-bridge.js";
 
-export class RealityCalc {
-  constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext('2d');
-    this.imageData = null;
+class RealityCalculator {
+  constructor() {
+    this.wasmReady = false;
   }
 
-  async loadImage(file) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => {
-        this.ctx.drawImage(img, 0, this.canvas.width, this.canvas.height);
-        this.imageData = this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
-        resolve(true);
-      };
-      img.src = URL.createObjectURL(file);
-    });
+  async init() {
+    try {
+      await initWasm();
+      this.wasmReady = true;
+      console.log("✅ WASM Reality Engine ready");
+    } catch (e) {
+      console.warn("⚠️ WASM unavailable, using JS fallback");
+    }
   }
 
-  async analyzeObject() {
-    return new Promise(resolve => {
-      aiWorker.onmessage = (e) => resolve(e.data);
-      aiWorker.postMessage(this.imageData);
-    });
+  calculatePhysics({ mass, velocity, volume }) {
+    if (this.wasmReady) {
+      return physicsFromWasm({ mass, velocity, volume });
+    }
+
+    // JS fallback
+    const energy = 0.5 * mass * velocity * velocity;
+    const momentum = mass * velocity;
+    const density = volume > 0 ? mass / volume : 0;
+
+    return { energy, momentum, density };
   }
 
-  calculatePhysics(params) {
-    return calcPhysics(params);
-  }
-
-  async processReality(file) {
-    await this.loadImage(file);
-    const aiResult = await this.analyzeObject();
-    const physicsResult = this.calculatePhysics({
-      weight: aiResult.weight,
-      volume: aiResult.volume,
-      velocity: aiResult.velocity || 0
-    });
-    return {...aiResult, physics: physicsResult};
+  estimateFromImage(meta) {
+    // Placeholder for photo-measure.js integration
+    return {
+      confidence: 0.42,
+      message: "Image estimation module connected"
+    };
   }
 }
+
+window.RealityCalculator = RealityCalculator;
