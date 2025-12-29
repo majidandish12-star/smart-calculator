@@ -1,30 +1,19 @@
 export class Body {
-  constructor({
-    x = 0,
-    y = 0,
-    mass = 1,
-    velocityX = 0,
-    velocityY = 0,
-    radius = 10
-  }) {
-    this.x = x;
-    this.y = y;
-    this.vx = velocityX;
-    this.vy = velocityY;
+  constructor({ mass, position, velocity, radius = 10 }) {
     this.mass = mass;
+    this.position = position;
+    this.velocity = velocity;
     this.radius = radius;
-
-    this.forceX = 0;
-    this.forceY = 0;
+    this.force = { x: 0, y: 0 };
   }
 
   applyForce(fx, fy) {
-    this.forceX += fx;
-    this.forceY += fy;
+    this.force.x += fx;
+    this.force.y += fy;
   }
 
-  resetForces() {
-    this.forceX = 0;
-    this.forceY = 0;
+  resetForce() {
+    this.force.x = 0;
+    this.force.y = 0;
   }
 }
