@@ -1,9 +1,6 @@
-import { integrate } from './integrator.js';
-
 export class World {
-  constructor({ gravity = 9.81, friction = 0.01 }) {
+  constructor({ gravity = 9.81 }) {
     this.gravity = gravity;
-    this.friction = friction;
     this.bodies = [];
   }
 
@@ -12,10 +9,8 @@ export class World {
   }
 
   step(dt) {
-    this.bodies.forEach(body => {
-      body.applyForce(0, body.mass * this.gravity);
-      body.applyForce(-body.vx * this.friction, -body.vy * this.friction);
-      integrate(body, dt);
+    this.bodies.forEach(b => {
+      b.applyForce(0, b.mass * this.gravity);
     });
   }
 }
