@@ -1,6 +1,6 @@
 /* =========================================================
    Smart Calculator Core Engine
-   Version: 1.0.0
+   Version: 2.0.0
    Author: Smart Calculator Project
    Responsibility: Pure calculation logic (NO UI)
 ========================================================= */
@@ -17,6 +17,18 @@ class CalculatorEngine {
     this.expression = '';
     this.lastResult = null;
     this.error = null;
+    this.memory = 0;
+    this.history = [];
+    this.mode = 'standard'; // standard | scientific
+  }
+
+  /* =======================
+     Mode Control
+  ======================== */
+  setMode(mode) {
+    if (['standard', 'scientific'].includes(mode)) {
+      this.mode = mode;
+    }
   }
 
   /* =======================
@@ -25,10 +37,8 @@ class CalculatorEngine {
   input(value) {
     if (this.error) this.reset();
 
-    // Normalize operators
     const normalized = this._normalizeInput(value);
 
-    // Prevent invalid sequences
     if (!this._isValidNext(normalized)) return;
 
     this.expression += normalized;
@@ -45,10 +55,18 @@ class CalculatorEngine {
     if (!this.expression) return 0;
 
     try {
-      const safeExpression = this._sanitizeExpression(this.expression);
-      const result = this._safeEval(safeExpression);
+      let expr = this._sanitizeExpression(this.expression);
+      expr = this._transformAdvancedOps(expr);
+
+      const result = this._safeEval(expr);
 
       this.lastResult = result;
+      this.history.push({
+        expression: this.expression,
+        result,
+        timestamp: Date.now()
+      });
+
       this.expression = String(result);
       this.error = null;
 
@@ -60,13 +78,46 @@ class CalculatorEngine {
   }
 
   /* =======================
+     Memory Functions
+  ======================== */
+  memoryAdd() {
+    this.memory += Number(this.expression || 0);
+  }
+
+  memorySubtract() {
+    this.memory -= Number(this.expression || 0);
+  }
+
+  memoryRecall() {
+    this.expression = String(this.memory);
+    return this.memory;
+  }
+
+  memoryClear() {
+    this.memory = 0;
+  }
+
+  /* =======================
+     History
+  ======================== */
+  getHistory() {
+    return [...this.history];
+  }
+
+  clearHistory() {
+    this.history = [];
+  }
+
+  /* =======================
      Utilities
   ======================== */
   _normalizeInput(val) {
     const map = {
       '×': '*',
       '÷': '/',
-      '−': '-'
+      '−': '-',
+      '^': '^',
+      '%': '%'
     };
     return map[val] || val;
   }
@@ -74,19 +125,12 @@ class CalculatorEngine {
   _isValidNext(val) {
     const last = this.expression.slice(-1);
 
-    // Prevent double operators
-    if (this._isOperator(last) && this._isOperator(val)) {
-      return false;
-    }
+    if (this._isOperator(last) && this._isOperator(val)) return false;
 
-    // Prevent starting with invalid operator
-    if (!this.expression && this._isOperator(val) && val !== '-') {
-      return false;
-    }
+    if (!this.expression && this._isOperator(val) && val !== '-') return false;
 
-    // Prevent multiple dots in number
     if (val === '.') {
-      const parts = this.expression.split(/[\+\-\*\/]/);
+      const parts = this.expression.split(/[\+\-\*\/\^]/);
       if (parts[parts.length - 1].includes('.')) return false;
     }
 
@@ -94,20 +138,28 @@ class CalculatorEngine {
   }
 
   _isOperator(char) {
-    return ['+', '-', '*', '/'].includes(char);
+    return ['+', '-', '*', '/', '^', '%'].includes(char);
   }
 
   _sanitizeExpression(expr) {
-    // Remove trailing operator
     if (this._isOperator(expr.slice(-1))) {
       expr = expr.slice(0, -1);
     }
     return expr;
   }
 
+  _transformAdvancedOps(expr) {
+    // Power operator
+    expr = expr.replace(/(\d+(\.\d+)?)\^(\d+(\.\d+)?)/g, 'Math.pow($1,$3)');
+
+    // Percentage
+    expr = expr.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+
+    return expr;
+  }
+
   _safeEval(expr) {
-    // Strict math-only evaluation
-    if (!/^[0-9+\-*/().\s]+$/.test(expr)) {
+    if (!/^[0-9+\-*/().\sMathpow,]+$/.test(expr)) {
       throw new Error('Unsafe expression');
     }
 
@@ -116,7 +168,7 @@ class CalculatorEngine {
   }
 
   /* =======================
-     Advanced (Future Ready)
+     Advanced Hooks (Future)
   ======================== */
   getLastResult() {
     return this.lastResult;
