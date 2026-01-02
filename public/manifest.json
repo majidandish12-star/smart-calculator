@@ -1,98 +1,121 @@
-// =======================================================
-// HyperCalc vLegendary Service Worker
-// Author: HyperCalc Team
-// Role: Offline, Cache, WASM, AI Modules, Fast & Safe
-// =======================================================
+/* =======================================================
+   HyperCalc — Smart Calculator PWA Service Worker v5.0
+   Enterprise‑grade | Offline‑First | Self‑Updating
+======================================================== */
 
-const CACHE_NAME = 'hypercalc-vlegendary-v1';
-const ASSETS_TO_CACHE = [
+const APP_VERSION = '5.0';
+const CACHE_NAME = `hypercalc-cache-${APP_VERSION}`;
+
+const PRECACHE_ASSETS = [
   './',
   './index.html',
-  './manifest.json',
+  './style.css',
+
+  // Core UI
   './ui.js',
-  './calculator.js',
-  './geometry.js',
   './canvas-measure.js',
-  './physics/world.js',
-  './physics/body.js',
-  './physics/sandbox.js',
-  './physics/integrator.js',
-  './auto_trainer.js',
-  './public/Rust/hypercalc_wasm_bg.wasm',
+  './geometry.js',
+
+  // Physics Engine
+  './public/physics/body.js',
+  './public/physics/world.js',
+  './public/physics/integrator.js',
+  './public/physics/sandbox.js',
+  './public/ui/sandbox-ui.js',
+
+  // WASM (اگر هست)
   './public/Rust/hypercalc_wasm.js',
-  './public/css/style.css',
+
+  // App logic
+  './calculator.js',
+  './auto_trainer.js',
+
+  // PWA meta
+  './manifest.json',
   './assets/icon-192.png',
-  './assets/icon-512.png',
-  './assets/icon-1024.png'
+  './assets/icon-512.png'
 ];
 
-// ==========================
-// Install
-// ==========================
-self.addEventListener('install', (event) => {
-  console.log('[SW] Installing HyperCalc vLegendary...');
-  self.skipWaiting();
+/* =========================
+   Install
+========================= */
+self.addEventListener('install', event => {
+  console.log(`🟡 Installing HyperCalc v${APP_VERSION}`);
+
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Caching core assets...');
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(PRECACHE_ASSETS);
     })
   );
+
+  self.skipWaiting();
 });
 
-// ==========================
-// Activate
-// ==========================
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating HyperCalc vLegendary...');
+/* =========================
+   Activate
+========================= */
+self.addEventListener('activate', event => {
+  console.log(`🟢 Activating HyperCalc v${APP_VERSION}`);
+
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if(key !== CACHE_NAME){
-          console.log('[SW] Removing old cache:', key);
-          return caches.delete(key);
-        }
-      })
-    ))
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(k => k !== CACHE_NAME)
+          .map(k => {
+            console.log(`🧹 Removing old cache: ${k}`);
+            return caches.delete(k);
+          })
+      )
+    )
   );
-  return self.clients.claim();
+
+  self.clients.claim();
 });
 
-// ==========================
-// Fetch – Cache First with Network Fallback
-// ==========================
-self.addEventListener('fetch', (event) => {
-  if(event.request.method !== 'GET') return;
+/* =========================
+   Fetch Strategy
+   — Offline First + Auto Refresh
+========================= */
+self.addEventListener('fetch', event => {
+  const req = event.request;
+
+  // Ignore dev tools / chrome extensions
+  if (req.url.startsWith('chrome-extension')) return;
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if(cached){
-        // ⚡ Serve from cache
-        return cached;
+    caches.match(req).then(cacheRes => {
+      if (cacheRes) {
+        // Background refresh
+        fetch(req)
+          .then(networkRes => {
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(req, networkRes.clone());
+            });
+          })
+          .catch(() => {});
+        return cacheRes;
       }
-      return fetch(event.request)
-        .then(response => {
-          // Cache dynamically
-          if(!response || response.status !== 200 || response.type !== 'basic') return response;
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
-          return response;
+
+      return fetch(req)
+        .then(networkRes => {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(req, networkRes.clone());
+          });
+          return networkRes;
         })
         .catch(() => {
-          // Fallback: offline HTML or image
-          if(event.request.destination === 'document') return caches.match('./index.html');
+          if (req.destination === 'document') {
+            return caches.match('./index.html');
+          }
         });
     })
   );
 });
 
-// ==========================
-// Push Notifications (Optional for Future)
-// ==========================
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'HyperCalc', body: 'آپدیت جدید موجود است!' };
-  event.waitUntil(
-    self.registration.showNotification(data.title, { body: data.body, icon: './assets/icon-192.png' })
-  );
+/* =========================
+   Force Update Handler
+========================= */
+self.addEventListener('message', e => {
+  if (e.data === 'UPDATE_NOW') self.skipWaiting();
 });
-
-console.log('[SW] HyperCalc Service Worker ready!');
