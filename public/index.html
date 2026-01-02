@@ -3,83 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧮 HyperCalc vLegendary – Ultimate Reality & AI Engine</title>
-
+<title>🧮 HyperCalc vLegendary – Reality & AI Ultra Engine</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
 
 <style>
-/* ======================= */
-/* Reset & Base */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(160deg,#0f172a,#1e293b); color: #e5e7eb; transition: background 0.5s ease; }
-
-/* ======================= */
-/* App Container */
-.app { 
-  width: 100%; max-width: 500px; background:#020617; border-radius: 35px; padding: 30px; box-shadow: 0 30px 90px rgba(0,0,0,.8); backdrop-filter: blur(10px); transition: all 0.3s ease; 
-}
-
-/* ======================= */
-/* Header */
-header { text-align: center; margin-bottom: 25px; }
-header h1 { font-size: 2rem; color: #fff; text-shadow: 0 0 12px #2563eb, 0 0 24px #2563eb; }
-header p { opacity: 0.85; font-size: 0.95rem; font-style: italic; text-shadow: 0 0 6px #047857; }
-
-/* ======================= */
-/* Display */
-.display {
-  background:#020617; border: 2px solid #334155; border-radius: 22px;
-  padding: 20px; font-size: 2rem; min-height: 70px; text-align: left; margin-bottom: 25px;
-  box-shadow: inset 0 2px 12px rgba(255,255,255,0.05);
-  overflow-wrap: break-word;
-  transition: all 0.3s ease;
-}
-
-/* ======================= */
-/* Keys Grid */
-.keys {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-button {
-  padding: 18px; font-size: 1.15rem; border: none; border-radius: 15px;
-  background: #1e293b; color:#e5e7eb; cursor: pointer;
-  transition: all 0.2s ease;
-}
+body { display:flex; justify-content:center; align-items:center; min-height:100vh; background: linear-gradient(160deg,#0f172a,#1e293b); color: #e5e7eb; transition: background 0.5s ease; }
+.app { width:100%; max-width:550px; background:#020617; border-radius:35px; padding:30px; box-shadow:0 30px 90px rgba(0,0,0,.9); backdrop-filter:blur(12px); transition: all 0.3s ease; }
+header { text-align:center; margin-bottom:25px; }
+header h1 { font-size:2rem; color:#fff; text-shadow: 0 0 12px #2563eb,0 0 24px #2563eb; }
+header p { opacity:0.85; font-size:0.95rem; font-style:italic; text-shadow:0 0 6px #047857; }
+.display { background:#020617; border:2px solid #334155; border-radius:22px; padding:20px; font-size:2rem; min-height:70px; text-align:left; margin-bottom:25px; box-shadow: inset 0 2px 12px rgba(255,255,255,0.05); overflow-wrap:break-word; transition:all 0.3s ease; }
+.keys { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+button { padding:18px; font-size:1.15rem; border:none; border-radius:15px; background:#1e293b; color:#e5e7eb; cursor:pointer; transition: all 0.2s ease; }
 button:hover { background:#334155; transform: scale(1.08); }
 button:active { transform: scale(0.95); }
-
 .op { background:#334155; }
-.equal { grid-column: span 2; background: #2563eb; color:#fff; box-shadow: 0 0 16px #2563eb; }
+.equal { grid-column: span 2; background:#2563eb; color:#fff; box-shadow:0 0 16px #2563eb; }
 .clear { background:#7f1d1d; color:#fff; }
-.extra { background:#047857; color:#fff; box-shadow: 0 0 12px #047857; }
-
-/* ======================= */
-/* Canvas */
-canvas {
-  margin-top: 25px; border-radius: 20px; border: 2px solid #334155; width:100%; height:auto;
-  background: #0f172a;
-  box-shadow: inset 0 2px 15px rgba(255,255,255,0.05);
-  cursor: crosshair;
-  touch-action: none;
-  transition: all 0.3s ease;
-}
-
-/* ======================= */
-/* Tooltip / Hint */
-.tooltip {
-  font-size: 0.75rem; color: #9ca3af; text-align: center; margin-top: 8px;
-}
-
-/* ======================= */
-/* Formula History */
-.history {
-  margin-top: 20px; background:#1e293b; padding:15px; border-radius:12px;
-  max-height:160px; overflow-y:auto; font-size:0.8rem; color:#cbd5e1;
-}
+.extra { background:#047857; color:#fff; box-shadow:0 0 12px #047857; }
+canvas { margin-top:25px; border-radius:20px; border:2px solid #334155; width:100%; height:auto; background:#0f172a; box-shadow: inset 0 2px 15px rgba(255,255,255,0.05); cursor:crosshair; touch-action:none; transition: all 0.3s ease; }
+.tooltip { font-size:0.75rem; color:#9ca3af; text-align:center; margin-top:8px; }
+.history { margin-top:20px; background:#1e293b; padding:15px; border-radius:12px; max-height:200px; overflow-y:auto; font-size:0.8rem; color:#cbd5e1; }
 </style>
 </head>
 
@@ -87,7 +33,7 @@ canvas {
 <div class="app">
 <header>
   <h1>🧮 HyperCalc vLegendary</h1>
-  <p>نسخه افسانه‌ای – Reality, Physics & AI Insights + AutoTrainer</p>
+  <p>نسخه افسانه‌ای – Reality, Physics & AI Insights + AutoTrainer Ultra</p>
 </header>
 
 <div id="display" class="display">0</div>
@@ -114,55 +60,46 @@ canvas {
 </div>
 
 <input type="file" id="fileInput" accept="image/*" hidden />
-<canvas id="canvas" width="420" height="260"></canvas>
+<canvas id="canvas" width="500" height="300"></canvas>
 <div class="tooltip">📌 تمامی محاسبات، فرمول‌ها، مراحل حل و پیشنهادات AI در پایین نمایش داده می‌شوند.</div>
 <div class="history" id="history"></div>
 </div>
 
-<script type="module" src="./ui.js"></script>
+<script type="module">
+import { Sandbox } from './physics/sandbox.js';
+import { HyperUltraPhysicsBody } from './physics/body.js';
+import { EngineV3 } from './core/engine.v3.js';
+import { AutoTrainer } from './auto_trainer.js';
+import { GeometryEngine3D } from './geometry.js';
 
-<script>
-/* ====================== */
-/* Service Worker */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js'); });
-}
+// ======================
+// Init Sandbox & Physics
+// ======================
+const sandbox = new Sandbox({ gravity: 9.81 });
+const ball = new HyperUltraPhysicsBody({ mass: 5, radius: 15, position:{x:150,y:50,z:0} });
+sandbox.world.addBody(ball);
+sandbox.update(1/60);
 
-/* ====================== */
-/* Reality / CSV / PDF */
-document.getElementById('imgBtn').onclick = ()=> document.getElementById('fileInput').click();
-document.getElementById('fileInput').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  console.log('📷 Image loaded for Reality Analysis:', file.name);
-});
-document.getElementById('csvBtn').onclick = ()=> alert('📊 Export CSV – آماده');
-document.getElementById('pdfBtn').onclick = ()=> alert('📄 Export PDF – آماده');
+// ======================
+// Init Geometry Engine
+// ======================
+const geo = new GeometryEngine3D({ canvasId:'canvas' });
+geo.circle(20,{x:200,y:100});
+geo.rectangle(60,30,{x:100,y:200});
+geo.cube(25,{x:300,y:150,z:0});
+geo.drawShapes();
 
-/* ====================== */
-/* Canvas Drawing */
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let drawing = false;
-canvas.addEventListener('mousedown',()=>drawing=true);
-canvas.addEventListener('mouseup',()=>drawing=false);
-canvas.addEventListener('mousemove',e=>{
-  if(!drawing) return;
-  ctx.fillStyle = '#2563eb';
-  ctx.fillRect(e.offsetX,e.offsetY,3,3);
-});
-
-/* ====================== */
-/* Keyboard & Input */
+// ======================
+// Display & Input
+// ======================
 const display = document.getElementById('display');
 const historyDiv = document.getElementById('history');
 let currentInput = '';
 document.addEventListener('keydown', e=>{
   if(!isNaN(e.key)) { currentInput += e.key; display.textContent = currentInput; }
   else if(e.key==='Enter') computeResult();
-  else if(e.key==='Backspace') { currentInput = currentInput.slice(0,-1); display.textContent = currentInput || '0'; }
+  else if(e.key==='Backspace') { currentInput=currentInput.slice(0,-1); display.textContent=currentInput||'0'; }
 });
-
 document.querySelectorAll('.keys button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const val = btn.textContent;
@@ -172,52 +109,51 @@ document.querySelectorAll('.keys button').forEach(btn=>{
   });
 });
 
-/* ====================== */
-/* Compute + AI Insights + AutoTrainer */
+// ======================
+// Compute + AutoTrainer + HyperCalc Legendary AI
+// ======================
 function computeResult(){
   try{
-    // ⚡ HyperCalc Legendary Engine
     const res = eval(currentInput.replace('×','*').replace('÷','/'));
-    display.textContent = res;
+    display.textContent=res;
 
-    // 🧠 History
     const timestamp = new Date().toLocaleTimeString();
-    const historyItem = document.createElement('div');
-    historyItem.textContent = `[${timestamp}] ${currentInput} = ${res}`;
-    historyDiv.prepend(historyItem);
+    const hItem = document.createElement('div');
+    hItem.textContent=`[${timestamp}] ${currentInput} = ${res}`;
+    historyDiv.prepend(hItem);
 
-    // 🌟 AutoTrainer Suggestions (20+ الگوریتم هوشمند)
-    const suggestions = [
-      currentInput.includes('+') ? '💡 Optimize addition patterns' : '',
-      currentInput.includes('×') ? '💡 Multiplication shortcuts possible' : '',
-      currentInput.includes('÷') ? '💡 Division remainder check' : '',
-      res>1000 ? '⚠ Large number detected – check overflow' : '',
-      res<0 ? '💡 Negative result – verify equation' : '',
-      currentInput.length>15 ? '💡 Complex expression – consider breaking down' : '',
-      !isNaN(res) && res%2===0 ? '💡 Even number detected' : '',
-      !isNaN(res) && res%2!==0 ? '💡 Odd number detected' : '',
-      currentInput.includes('.') ? '💡 Decimal detected – rounding may apply' : '',
-      currentInput.includes('-') ? '💡 Subtraction check for negative numbers' : '',
-      currentInput.match(/\d{3,}/) ? '💡 Large number grouping suggested' : '',
-      currentInput.includes('*') && res>100 ? '💡 Multiplication optimization advised' : '',
-      currentInput.includes('/') && res<1 ? '💡 Division leads to fraction' : '',
-      currentInput.includes('(') ? '💡 Parentheses detected – nested calculation' : '',
-      currentInput.includes(')') ? '💡 Closing bracket check' : '',
-      currentInput.includes('0') ? '💡 Zero detected – check division by zero' : '',
-      currentInput.length>20 ? '💡 Expression too long – consider breaking down' : '',
-      currentInput.includes('1') ? '💡 Simple number detected – fast compute possible' : '',
-      currentInput.includes('9') ? '💡 High digit detected – precision check' : '',
-      true ? '💡 AutoTrainer: Next best calculation suggested!' : ''
-    ].filter(Boolean);
-
+    // 🌟 AutoTrainer Suggestions
+    const suggestions = AutoTrainer.suggest(currentInput);
     suggestions.forEach(s=>{
-      const sItem=document.createElement('div'); sItem.style.color='#facc15';
-      sItem.textContent = s; historyDiv.prepend(sItem);
+      const sItem = document.createElement('div'); sItem.style.color='#facc15';
+      sItem.textContent=s.hint || s;
+      historyDiv.prepend(sItem);
     });
+
+    // Physics & Geometry Update
+    sandbox.update(1/60);
+    geo.drawShapes();
 
     currentInput='';
   }catch(e){ display.textContent='Error'; console.error(e);}
 }
+
+// ======================
+// Reality / CSV / PDF
+// ======================
+document.getElementById('imgBtn').onclick = ()=> document.getElementById('fileInput').click();
+document.getElementById('fileInput').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  console.log('📷 Image loaded for Reality Analysis:', file.name);
+});
+document.getElementById('csvBtn').onclick = ()=> alert('📊 Export CSV – آماده');
+document.getElementById('pdfBtn').onclick = ()=> alert('📄 Export PDF – آماده');
+
+// ======================
+// Service Worker
+// ======================
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js'); }); }
+
 </script>
 </body>
 </html>
