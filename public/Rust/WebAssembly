@@ -1,17 +1,120 @@
 use wasm_bindgen::prelude::*;
+use serde::Serialize;
+use js_sys::Date;
+use std::f64::consts::*;
+
+// ======================================================
+// HyperCalc Ultimate Physics Engine – WASM Ready
+// ======================================================
 #[wasm_bindgen]
-pub fn calcPhysics(params: &JsValue) -> JsValue {
-    let weight: f64 = js_sys::Reflect::get(params, &JsValue::from_str("weight")).unwrap().as_f64().unwrap();
-    let volume: f64 = js_sys::Reflect::get(params, &JsValue::from_str("volume")).unwrap().as_f64().unwrap();
-    let velocity: f64 = js_sys::Reflect::get(params, &JsValue::from_str("velocity")).unwrap().as_f64().unwrap();
+#[derive(Serialize)]
+pub struct PhysicsData {
+    pub weight: f64,
+    pub volume: f64,
+    pub velocity: f64,
+    pub density: f64,
+    pub kinetic_energy: f64,
+    pub potential_energy: f64,
+    pub momentum: f64,
+    pub force: f64,
+    pub pressure: f64,
+    pub angular_velocity: Option<f64>,
+    pub torque: Option<f64>,
+    pub energy_joules: Option<f64>,
+    pub temperature_c: Option<f64>,
+    pub comments: Vec<String>,
+}
 
-    let kinetic_energy = 0.5 * weight * velocity.powf(2.0);
-    let density = weight / volume;
+// ======================================================
+// محاسبات پیشرفته فیزیک و انرژی
+// ======================================================
+#[wasm_bindgen]
+pub fn calcPhysicsAdvanced(params: &JsValue) -> JsValue {
+    let weight: f64 = js_sys::Reflect::get(params, &JsValue::from_str("weight")).unwrap().as_f64().unwrap_or(1.0);
+    let volume: f64 = js_sys::Reflect::get(params, &JsValue::from_str("volume")).unwrap().as_f64().unwrap_or(1.0);
+    let velocity: f64 = js_sys::Reflect::get(params, &JsValue::from_str("velocity")).unwrap().as_f64().unwrap_or(0.0);
+    let height: f64 = js_sys::Reflect::get(params, &JsValue::from_str("height")).unwrap_or(JsValue::from_f64(0.0)).as_f64().unwrap_or(0.0);
+    let angular_velocity: f64 = js_sys::Reflect::get(params, &JsValue::from_str("angular_velocity")).unwrap_or(JsValue::from_f64(0.0)).as_f64().unwrap_or(0.0);
+    let temperature_c: f64 = js_sys::Reflect::get(params, &JsValue::from_str("temperature_c")).unwrap_or(JsValue::from_f64(25.0)).as_f64().unwrap_or(25.0);
+
+    let density = if volume != 0.0 { weight / volume } else { 0.0 };
+    let kinetic_energy = 0.5 * weight * velocity.powi(2);
+    let potential_energy = weight * 9.81 * height;
     let momentum = weight * velocity;
+    let force = weight * 9.81;
+    let pressure = if volume != 0.0 { force / volume } else { 0.0 };
+    let torque = angular_velocity * weight * 0.5;
+    let energy_joules = Some(kinetic_energy + potential_energy + 0.5 * torque);
 
-    JsValue::from_serde(&serde_json::json!({
-        "kinetic_energy": kinetic_energy,
-        "density": density,
-        "momentum": momentum
-    })).unwrap()
+    let mut comments = vec![];
+    if weight > 1000.0 { comments.push("⚠ Heavy object – check load limits".to_string()); }
+    if velocity > 50.0 { comments.push("⚠ High speed – relativistic effects ignored".to_string()); }
+    if density > 5000.0 { comments.push("⚠ Extremely dense material".to_string()); }
+    comments.push(format!("Temp: {}C", temperature_c));
+
+    let data = PhysicsData {
+        weight,
+        volume,
+        velocity,
+        density,
+        kinetic_energy,
+        potential_energy,
+        momentum,
+        force,
+        pressure,
+        angular_velocity: Some(angular_velocity),
+        torque: Some(torque),
+        energy_joules,
+        temperature_c: Some(temperature_c),
+        comments,
+    };
+
+    JsValue::from_serde(&data).unwrap()
+}
+
+// ======================================================
+// Bulk Multi-Object Physics Simulation
+// ======================================================
+#[wasm_bindgen]
+pub fn calcPhysicsMultiple(objects: &JsValue) -> JsValue {
+    let arr: Vec<JsValue> = objects.into_serde().unwrap_or_default();
+    let mut result = Vec::with_capacity(arr.len());
+
+    for obj in arr {
+        let physics = calcPhysicsAdvanced(&obj);
+        result.push(physics);
+    }
+
+    JsValue::from_serde(&result).unwrap()
+}
+
+// ======================================================
+// Metadata & AI Suggestions
+// ======================================================
+#[wasm_bindgen]
+#[derive(Serialize)]
+pub struct PhysicsMetadata {
+    pub version: String,
+    pub timestamp: String,
+    pub object_count: usize,
+    pub suggestions: Vec<String>,
+}
+
+#[wasm_bindgen]
+pub fn generatePhysicsMetadata(count: usize) -> JsValue {
+    let suggestions = vec![
+        "💡 Enable collision detection",
+        "💡 Visualize force vectors in 3D",
+        "💡 Integrate with AutoTrainer for AI hints",
+        "💡 Use batch calculations for massive datasets",
+        "💡 Display energy changes over time",
+    ];
+
+    let data = PhysicsMetadata {
+        version: "vX+++ Ultimate Physics".to_string(),
+        timestamp: Date::new_0().to_iso_string().into(),
+        object_count: count,
+        suggestions,
+    };
+    JsValue::from_serde(&data).unwrap()
 }
