@@ -1,12 +1,89 @@
 [package]
 name = "hypercalc_wasm"
 version = "0.1.0"
+authors = ["Majid Andishmandzade <majid@example.com>"]
 edition = "2021"
+description = "HyperCalc Ultimate WASM Engine – AI-ready, Physics, Math, 3D, Multi-Object Simulation"
+license = "MIT"
+repository = "https://github.com/majidandish12-star/smart-calculator"
+readme = "README.md"
+keywords = ["WASM", "Physics", "AI", "Simulation", "Calculator", "3D", "High-Precision"]
+categories = ["science", "simulation", "web"]
 
 [dependencies]
+# Core WASM
 wasm-bindgen = "0.2"
+js-sys = "0.3"
+
+# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
+# Math & Physics utilities
+nalgebra = { version = "0.32", features = ["serde-serialize"] } # Linear algebra, 3D vectors
+num-traits = "0.2" # Advanced math traits
+rand = "0.8"       # Random generators for simulations
+approx = "0.5"     # Approximate comparisons for floats
+special-float = "0.3" # Handle NaN, Infinity safely
+
+# Optional AI / ML integration
+ndarray = { version = "0.15", features = ["serde"] } # Matrices for ML
+linfa = "0.6" # Rust ML library for AI suggestions
+linfa-prelude = "0.6"
+smartcore = "0.3" # Classical ML algorithms
+
+# Performance & concurrency
+rayon = "1.7" # Parallel multi-threading for bulk physics simulation
+
+# Utilities & logging
+log = "0.4"
+console_error_panic_hook = "0.1" # Better debugging in WASM
+uuid = { version = "1", features = ["v4"] } # Unique IDs for objects
+chrono = { version = "0.4", features = ["serde"] } # Timestamps
+
+# Advanced optional features
+nalgebra-glm = "0.16" # 3D graphics math
+approx_eq = "0.5"     # Compare floating points safely
+itertools = "0.10"    # Extra iterator utilities
+anyhow = "1.0"        # Better error handling
+thiserror = "1.0"     # Custom error types
+
+# ==================================================
+# Library configuration for WASM
+# ==================================================
 [lib]
 crate-type = ["cdylib"]
+
+# ==================================================
+# Features – modular capabilities
+# ==================================================
+[features]
+default = ["physics", "math", "ai"]
+physics = ["nalgebra", "num-traits", "approx", "special-float"]
+math = ["num-traits", "approx"]
+ai = ["linfa", "ndarray", "smartcore"]
+concurrency = ["rayon"]
+
+# ==================================================
+# Metadata for AI & AutoTrainer (Optional hints)
+# ==================================================
+[package.metadata.hypercalc]
+ai_ready = true
+multi_object_simulation = true
+bulk_physics = true
+explain_engine = true
+auto_trainer = true
+webgl_support = true
+3d_vectors = true
+high_precision = true
+experimental_features = ["quantum-sim", "relativistic-calc", "thermodynamics", "fluid-dynamics"]
+
+# ==================================================
+# Recommendations / Notes for developers
+# ==================================================
+# - Enable `console_error_panic_hook` in debug mode for better error tracing in browser
+# - Use `rayon` for multi-thread bulk physics simulation
+# - Use `nalgebra` or `nalgebra-glm` for 3D vector math
+# - Serialize & send complex objects via `serde_json` to JS
+# - AI suggestions & AutoTrainer can consume `ndarray` matrices for ML predictions
+# - All features modular via [features] section for flexible compilation
